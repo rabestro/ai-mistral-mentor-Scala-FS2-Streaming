@@ -21,3 +21,5 @@
  * Log the retry attempts and handle the final failure using handleErrorWith.
  */
 
+import cats.effect.unsafe.implicits.global
+Solution5.run(Nil).unsafeRunSync()
