@@ -1,4 +1,5 @@
-import DatabaseConnection.{acquire, release, sleepUpTo}
+import CommonFunctions.sleepUpTo
+import DatabaseConnection.{acquire, release}
 import cats.effect.{ExitCode, IO, IOApp}
 import fs2.Stream
 

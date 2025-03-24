@@ -1,8 +1,7 @@
+import CommonFunctions.sleepUpTo
 import cats.effect.IO
 
-import scala.concurrent.duration.{DurationInt, FiniteDuration}
-import scala.math.abs
-import scala.util.Random
+import scala.concurrent.duration.DurationInt
 
 final case class DatabaseConnection(connection: String) extends AnyVal
 
@@ -17,6 +16,4 @@ object DatabaseConnection {
   val release: DatabaseConnection => IO[Unit] = (conn: DatabaseConnection) =>
     IO.println(s"Releasing connection to the database: $conn")
 
-  def sleepUpTo(maxDuration: FiniteDuration): Unit =
-    Thread.sleep(abs(Random.nextLong()) % maxDuration.toMillis)
 }
