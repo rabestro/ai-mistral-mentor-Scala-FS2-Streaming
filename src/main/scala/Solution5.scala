@@ -37,21 +37,25 @@ object Solution5 extends IOApp {
     sleepUpTo(4.second)
     // Introducing an error in the effect (50% rate)
     if (Random.nextBoolean())
-      throw new RuntimeException(s"⛔Error processing the number $number")
+      throw new RuntimeException(s"Error processing the number $number")
     println(s"✅Successfully processed number $number")
   })
 
-  def saveWithRetry(connection: DatabaseConnection)(number: Int): IO[Unit] =
-    saveNumber(connection)(number)
-      .handleErrorWith { case e: RuntimeException =>
-        IO.println(s"Error encountered: ${e.getMessage}")
-      }
+  private def saveWithRetry(connection: DatabaseConnection)(number: Int, attempts: Int = 3): IO[Unit] = {
+    saveNumber(connection)(number).handleErrorWith {
+      case _: RuntimeException if attempts > 1 =>
+        IO.println(s"⚠️Retrying ($attempts left) for number $number...") *>
+          saveWithRetry(connection)(number, attempts - 1)
+      case e: RuntimeException =>
+        IO.println(s"⛔Error encountered: ${e.getMessage}")
+    }
+  }
 
   // Create the stream and apply the logging effect with concurrency and error handling
   private def numStream(connection: DatabaseConnection): Stream[IO, Unit] =
     Stream.range(1, 11)
       .covary[IO]
-      .parEvalMap(5)(saveWithRetry(connection)) // Process up to 5 elements concurrently
+      .parEvalMap(5)(number => saveWithRetry(connection)(number)) // Process up to 5 elements concurrently
 
   override def run(args: List[String]): IO[ExitCode] =
     Stream.bracket(acquire)(release)
