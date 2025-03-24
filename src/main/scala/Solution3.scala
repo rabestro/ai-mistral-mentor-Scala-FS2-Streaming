@@ -1,10 +1,9 @@
+import DatabaseConnection.{acquire, release, sleepUpTo}
 import cats.effect.{ExitCode, IO, IOApp}
 import fs2.Stream
 
 import java.time.LocalTime
-import scala.concurrent.duration.{DurationInt, FiniteDuration}
-import scala.math.abs
-import scala.util.Random
+import scala.concurrent.duration.DurationInt
 
 /**
  * Exercise 3: Concurrent Effectful Streams with Resource Management
@@ -31,19 +30,6 @@ import scala.util.Random
  */
 
 object Solution3 extends IOApp {
-  def sleepUpTo(maxDuration: FiniteDuration): Unit =
-    Thread.sleep(abs(Random.nextLong()) % maxDuration.toMillis)
-
-  val acquire: IO[DatabaseConnection] = IO {
-    val conn = DatabaseConnection("test-db")
-    println(s"Acquiring connection to the database: $conn")
-    sleepUpTo(1.seconds)
-    conn
-  }
-
-  val release: DatabaseConnection => IO[Unit] = (conn: DatabaseConnection) =>
-    IO.println(s"Releasing connection to the database: $conn")
-
   // Define the logging effect
   def saveNumber(connection: DatabaseConnection)(n: Int): IO[Unit] = IO({
     println(f"Saving number: $n%02d to $connection.\t Time: ${LocalTime.now()}")
