@@ -21,5 +21,5 @@
 import fs2.Stream
 
 val intStream = Stream.range(1, 11)
-
 intStream.map(println).compile.drain
+
