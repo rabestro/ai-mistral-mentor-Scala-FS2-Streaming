@@ -27,10 +27,8 @@ import scala.concurrent.duration.DurationInt
 
 val numbers = Stream.range(1, 11).covary[IO]
 
-def networkRequest(number: Int): IO[Int] = {
-  IO.sleep(1.second)
-  IO(number * number)
-}
+def networkRequest(number: Int): IO[Int] =
+  IO.sleep(5.second) *> IO(number * number)
 
 numbers
   .parEvalMap(5)(networkRequest)

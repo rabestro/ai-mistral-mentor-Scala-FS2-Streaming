@@ -14,6 +14,7 @@
  * Verify that the error is handled and logged appropriately.
  * Ensure that the stream continues processing after the error.
  * Check that all elements, except the one with the error, are processed successfully.
+ *
  * Hints:
  *
  * Use Stream.eval or Stream.emit to introduce errors.
