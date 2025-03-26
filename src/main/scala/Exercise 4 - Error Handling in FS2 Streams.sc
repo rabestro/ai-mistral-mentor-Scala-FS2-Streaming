@@ -22,19 +22,15 @@
  * Log the error message and continue processing the remaining elements.
  */
 
+import CommonFunctions.sleepUpTo
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import fs2.Stream
 
 import java.time.LocalTime
-import scala.concurrent.duration.{DurationInt, FiniteDuration}
-import scala.math.abs
-import scala.util.Random
+import scala.concurrent.duration.DurationInt
 
 final case class DatabaseConnection(connection: String) extends AnyVal
-
-def sleepUpTo(maxDuration: FiniteDuration): Unit =
-  Thread.sleep(abs(Random.nextLong()) % maxDuration.toMillis)
 
 val acquire = IO {
   val conn = DatabaseConnection("test-db")
