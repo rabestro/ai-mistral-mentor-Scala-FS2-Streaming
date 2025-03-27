@@ -15,20 +15,21 @@
 import cats.effect.{IO, Ref}
 import cats.implicits.catsSyntaxParallelTraverse_
 
-import scala.concurrent.duration.{DurationInt, FiniteDuration}
+import scala.concurrent.duration.{Duration, DurationInt, FiniteDuration}
 import scala.util.Random
 
 val randomDuration: IO[FiniteDuration] =
   IO(Random.between(100, 500)).map(_.millis)
 
-val randomDelay: IO[Unit] =
-  randomDuration.flatMap(IO.sleep)
-
 def increment(ref: Ref[IO, Int]): IO[Unit] =
   ref.update(_ + 1)
 
-def task(ref: Ref[IO, Int]): IO[Unit] =
-  randomDelay >> increment(ref) >> IO.println("Counter increased!")
+def task(ref: Ref[IO, Int]): IO[Unit] = for {
+  delay <- randomDuration
+  _ <- IO.sleep(delay)
+  _ <- increment(ref)
+  _ <- IO.println(s"Counter increased after ${delay.toMillis}ms delay!")
+} yield ()
 
 def concurrentTasks(concurrentLevel: Int)(task: IO[Unit]): IO[Unit] =
   (1 to concurrentLevel).toList.parTraverse_(_ => task)
@@ -43,5 +44,5 @@ val program: IO[Unit] = for {
 
 import cats.effect.unsafe.implicits.global
 
-program.unsafeRunSync()
+program.timeout(Duration.Inf).unsafeRunSync()
 
