@@ -23,20 +23,20 @@
  * Use compile.toList to collect the results into a list.
  */
 
-import DatabaseConnection.{acquire, release}
+import resource_example.DatabaseConnection.{acquire, release}
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import fs2.Stream
 
 import scala.concurrent.duration.DurationInt
 
-def networkRequest(connection: DatabaseConnection)(number: Int): IO[Int] =
+def networkRequest(connection: resource_example.DatabaseConnection)(number: Int): IO[Int] =
   IO.println(s"Requesting $connection for number $number") *>
     IO.sleep(1.second) *>
     IO(number * number) <*
     IO.println(s"✅Successfully processed number $number")
 
-def dataStream(connection: DatabaseConnection) =
+def dataStream(connection: resource_example.DatabaseConnection) =
   Stream.range(1, 11)
     .covary[IO]
     .parEvalMap(5)(networkRequest(connection))

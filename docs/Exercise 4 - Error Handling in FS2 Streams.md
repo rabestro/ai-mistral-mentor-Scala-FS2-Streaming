@@ -73,18 +73,18 @@ object Solution4 extends IOApp {
   def sleepUpTo(maxDuration: FiniteDuration): Unit =
     Thread.sleep(abs(Random.nextLong()) % maxDuration.toMillis)
 
-  val acquire: IO[DatabaseConnection] = IO {
+  val acquire: IO[resource_example.DatabaseConnection] = IO {
     val conn = DatabaseConnection("test-db")
     println(s"Acquiring connection to the database: $conn")
     sleepUpTo(1.seconds)
     conn
   }
 
-  val release: DatabaseConnection => IO[Unit] = (conn: DatabaseConnection) =>
+  val release: resource_example.DatabaseConnection => IO[Unit] = (conn: resource_example.DatabaseConnection) =>
     IO.println(s"Releasing connection to the database: $conn")
 
   // Define the effect with error handling
-  def saveNumber(connection: DatabaseConnection)(number: Int): IO[Unit] = IO({
+  def saveNumber(connection: resource_example.DatabaseConnection)(number: Int): IO[Unit] = IO({
     println(f"Saving number: $number%02d to $connection.\t Time: ${LocalTime.now()}")
     sleepUpTo(4.second)
     // Introducing an error in the effect
@@ -95,7 +95,7 @@ object Solution4 extends IOApp {
   }
 
   // Create the stream and apply the logging effect with concurrency and error handling
-  def numStream(connection: DatabaseConnection): Stream[IO, Unit] =
+  def numStream(connection: resource_example.DatabaseConnection): Stream[IO, Unit] =
     Stream.range(1, 11)
       .covary[IO]
       .parEvalMap(5)(saveNumber(connection)) // Process up to 5 elements concurrently

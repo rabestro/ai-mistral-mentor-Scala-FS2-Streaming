@@ -27,7 +27,7 @@
  * Use attempt to handle errors gracefully.
  */
 
-import DatabaseConnection.{acquire, release}
+import resource_example.DatabaseConnection.{acquire, release}
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import fs2.Stream
@@ -39,7 +39,7 @@ import scala.util.Random
 def randomDuration(min: FiniteDuration, max: FiniteDuration): FiniteDuration =
   FiniteDuration(min.toNanos + Random.nextLong((max - min).toNanos), TimeUnit.NANOSECONDS)
 
-def networkRequest(connection: DatabaseConnection)(number: Int): IO[Int] = for {
+def networkRequest(connection: resource_example.DatabaseConnection)(number: Int): IO[Int] = for {
   _ <- IO.println(s"Requesting $connection for number $number")
   _ <- IO.sleep(randomDuration(min = 1.second, max = 4.seconds))
   square =
@@ -49,7 +49,7 @@ def networkRequest(connection: DatabaseConnection)(number: Int): IO[Int] = for {
   _ <- IO.println(s"✅Successfully processed number $number")
 } yield (square)
 
-def requestWithRetry(connection: DatabaseConnection)(number: Int): IO[Int] = {
+def requestWithRetry(connection: resource_example.DatabaseConnection)(number: Int): IO[Int] = {
   networkRequest(connection)(number).attempt.map {
     case Right(value) => value
     case Left(e) => {
@@ -59,7 +59,7 @@ def requestWithRetry(connection: DatabaseConnection)(number: Int): IO[Int] = {
   }
 }
 
-def dataStream(connection: DatabaseConnection) =
+def dataStream(connection: resource_example.DatabaseConnection) =
   Stream.range(1, 11)
     .covary[IO]
     .parEvalMap(5)(requestWithRetry(connection))
